@@ -27,18 +27,22 @@ services:
     ports:
       - '6379:6379'
   misp:
-    image: 'misp:latest'
+    image: 'opencybersec/misp:latest'
     environment: 
-      - MARIADB_HOSTNAME=mariadb_1
+      - MARIADB_HOSTNAME=mariadb
       - MARIADB_PORT=3306
       - MARIADB_DATABASE=misp
       - MARIADB_USER=misp
       - MARIADB_PASSWORD=mispchangeme
-      - REDIS_HOSTNAME=mariadb_1
+      - REDIS_HOSTNAME=redis
       - REDIS_PORT=6379
     ports:
       - '8443:443'
+    volumes:
+      - 'misp_data:/persistent'
 
 volumes:
   mariadb_data:
+    driver: local
+  misp_data:
     driver: local

@@ -1,6 +1,14 @@
 FROM ubuntu:bionic
 MAINTAINER OpenCyberSec - https://github.com/OpenCyberSec
 
+ENV APACHE_CERT_SUBJ "/CN=MISP/O=OpenCyberSec/C=EU" 
+ENV APACHE_SERVERADMIN "open@opencybersec.org"
+
+ENV MISP_VERSION v2.4.105
+ENV CybOX_VERSION v2.1.0.12
+ENV python-stix_VERSION v1.1.1.4
+ENV cake-resque_VERSION 4.1.2
+
 RUN apt-get update -q \
         && DEBIAN_FRONTEND=noninteractive apt-get install -qy --no-install-recommends apt-utils supervisor build-essential zip php-pear git redis-server make python-dev python-pip libxml2-dev libxslt1-dev zlib1g-dev php-dev libapache2-mod-php php-mysql curl apache2 mysql-client postfix python-dev python-pip libxml2-dev libxslt-dev zlib1g-dev gcc libsodium-dev \
         && pip install -U pip setuptools \
@@ -13,27 +21,26 @@ RUN pear install Crypt_GPG
 RUN cd /var/www \
         && git clone https://github.com/MISP/MISP.git /var/www/MISP \
         && cd /var/www/MISP \
-        && git checkout tags/v2.4.105 \
+        && git checkout tags/$MISP_VERSION \
         && cd /var/www/MISP \
         && git config core.filemode false
 
 RUN cd /var/www/MISP/app/files/scripts \
         && git clone https://github.com/CybOXProject/python-cybox.git \
         && cd /var/www/MISP/app/files/scripts/python-cybox \
-        && git checkout v2.1.0.12 \
+        && git checkout $CybOX_VERSION \
         && python setup.py install
 RUN cd /var/www/MISP/app/files/scripts \
         && git clone https://github.com/STIXProject/python-stix.git \
         && cd /var/www/MISP/app/files/scripts/python-stix \
-        && git checkout v1.1.1.4 \
+        && git checkout $python-stix_VERSION \
         && python setup.py install
-
 RUN cd /var/www/MISP \
         && git submodule init \
         && git submodule update
 RUN cd /var/www/MISP/app \
         && curl -s https://getcomposer.org/installer | php \
-        && php composer.phar require kamisama/cake-resque:4.1.2 \
+        && php composer.phar require kamisama/cake-resque:$cake-resque_VERSION \
         && php composer.phar config vendor-dir Vendor \
         && php composer.phar install
 
@@ -47,22 +54,19 @@ RUN chown -R www-data:www-data /var/www/MISP \
         && chmod -R g+ws /var/www/MISP/app/files \
         && chmod -R g+ws /var/www/MISP/app/files/scripts/tmp
 
-# 5/ Create a database and user
-# Created on start.sh
-
 RUN cp /var/www/MISP/INSTALL/apache.24.misp.ssl /etc/apache2/sites-available/misp.conf
 RUN a2dissite 000-default \
         && a2ensite misp
 
 RUN cd /tmp/ && \
-                openssl req -nodes -newkey rsa:4096 -keyout new.cert.key -out new.cert.csr -subj "/CN=MISP/O=OpenCyberSec/C=EU" && \
+                openssl req -nodes -newkey rsa:4096 -keyout new.cert.key -out new.cert.csr -subj $APACHE_CERT_SUBJ && \
                 openssl x509 -in new.cert.csr -out new.cert.cert -req -signkey new.cert.key -days 1825 && \
                 cp new.cert.cert /etc/ssl/private/misp.local.crt && \
                 cp new.cert.key  /etc/ssl/private/misp.local.key && \
                 chown www-data:www-data /etc/ssl/private/misp.local*
 
 RUN cd /etc/apache2/sites-available/ && \
-    sed -i "s&\(ServerAdmin \)\(.*\)&\1open@opencybersec.org &g" misp.conf && \
+    sed -i "s&\(ServerAdmin \)\(.*\)&\1$APACHE_SERVERADMIN &g" misp.conf && \
     sed -i "s&\(SSLCertificateChainFile.*\)&&g" misp.conf && \
     sed -i "s&\(VirtualHost \)\(.*\)\>&\1*:443&g" misp.conf && \
     a2enmod ssl
@@ -77,14 +81,6 @@ RUN cd /var/www/MISP/app/Config \
         && cp -a config.default.php config.php
 
 RUN pip install redis \
-    && cd /usr/local/src/ \
-    && git clone https://github.com/jedisct1/libsodium.git \
-    && cd libsodium \
-    && ./autogen.sh \
-    && ./configure \
-    && make \
-    && make install \
-    && ldconfig \
     && cd /usr/local/src/ \
     && curl -L -O https://github.com/zeromq/zeromq4-1/releases/download/v4.1.6/zeromq-4.1.6.tar.gz \
     && tar -xvf zeromq-4.1.6.tar.gz \
