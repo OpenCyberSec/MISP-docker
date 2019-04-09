@@ -1,9 +1,6 @@
 FROM ubuntu:bionic
 MAINTAINER OpenCyberSec - https://github.com/OpenCyberSec
 
-ENV APACHE_CERT_SUBJ "/CN=MISP/O=OpenCyberSec/C=EU" 
-ENV APACHE_SERVERADMIN "open@opencybersec.org"
-
 ENV MISP_VERSION v2.4.105
 ENV CybOX_VERSION v2.1.0.12
 ENV PYTHONSTIX_VERSION v1.1.1.4
@@ -58,15 +55,7 @@ RUN cp /var/www/MISP/INSTALL/apache.24.misp.ssl /etc/apache2/sites-available/mis
 RUN a2dissite 000-default \
         && a2ensite misp
 
-RUN cd /tmp/ && \
-                openssl req -nodes -newkey rsa:4096 -keyout new.cert.key -out new.cert.csr -subj $APACHE_CERT_SUBJ && \
-                openssl x509 -in new.cert.csr -out new.cert.cert -req -signkey new.cert.key -days 1825 && \
-                cp new.cert.cert /etc/ssl/private/misp.local.crt && \
-                cp new.cert.key  /etc/ssl/private/misp.local.key && \
-                chown www-data:www-data /etc/ssl/private/misp.local*
-
 RUN cd /etc/apache2/sites-available/ && \
-    sed -i "s&\(ServerAdmin \)\(.*\)&\1$APACHE_SERVERADMIN &g" misp.conf && \
     sed -i "s&\(SSLCertificateChainFile.*\)&&g" misp.conf && \
     sed -i "s&\(VirtualHost \)\(.*\)\>&\1*:443&g" misp.conf && \
     a2enmod ssl

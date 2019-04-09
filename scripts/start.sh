@@ -40,4 +40,16 @@ else
 fi
 
 #chown -R www-data:www-data /var/www/MISP
+if ! [[ -f /etc/ssl/private/misp.local.key ]];then
+	cd /tmp/
+	openssl req -nodes -newkey rsa:4096 -keyout new.cert.key -out new.cert.csr -subj $APACHE_CERT_SUBJ
+	openssl x509 -in new.cert.csr -out new.cert.cert -req -signkey new.cert.key -days 1825
+	cp new.cert.cert /etc/ssl/private/misp.local.crt
+	cp new.cert.key  /etc/ssl/private/misp.local.key
+	chown www-data:www-data /etc/ssl/private/misp.local*	
+	rm -rf /tmp/new.cert*
+fi
+
+sed -i "s&\(ServerAdmin \)\(.*\)&\1$APACHE_SERVERADMIN &g" /etc/apache2/sites-available/misp.conf
+
 /usr/bin/supervisord

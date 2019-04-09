@@ -29,6 +29,8 @@ services:
   misp:
     image: 'opencybersec/misp:latest'
     environment: 
+      - APACHE_CERT_SUBJ=/CN=MISP/O=OpenCyberSec/C=EU
+      - APACHE_SERVERADMIN=open@opencybersec.org
       - MARIADB_HOSTNAME=mariadb
       - MARIADB_PORT=3306
       - MARIADB_DATABASE=misp
