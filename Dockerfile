@@ -6,8 +6,8 @@ ENV APACHE_SERVERADMIN "open@opencybersec.org"
 
 ENV MISP_VERSION v2.4.105
 ENV CybOX_VERSION v2.1.0.12
-ENV python-stix_VERSION v1.1.1.4
-ENV cake-resque_VERSION 4.1.2
+ENV PYTHONSTIX_VERSION v1.1.1.4
+ENV CAKERESQUE_VERSION 4.1.2
 
 RUN apt-get update -q \
         && DEBIAN_FRONTEND=noninteractive apt-get install -qy --no-install-recommends apt-utils supervisor build-essential zip php-pear git redis-server make python-dev python-pip libxml2-dev libxslt1-dev zlib1g-dev php-dev libapache2-mod-php php-mysql curl apache2 mysql-client postfix python-dev python-pip libxml2-dev libxslt-dev zlib1g-dev gcc libsodium-dev \
@@ -33,14 +33,14 @@ RUN cd /var/www/MISP/app/files/scripts \
 RUN cd /var/www/MISP/app/files/scripts \
         && git clone https://github.com/STIXProject/python-stix.git \
         && cd /var/www/MISP/app/files/scripts/python-stix \
-        && git checkout $python-stix_VERSION \
+        && git checkout $PYTHONSTIX_VERSION \
         && python setup.py install
 RUN cd /var/www/MISP \
         && git submodule init \
         && git submodule update
 RUN cd /var/www/MISP/app \
         && curl -s https://getcomposer.org/installer | php \
-        && php composer.phar require kamisama/cake-resque:$cake-resque_VERSION \
+        && php composer.phar require kamisama/cake-resque:$CAKERESQUE_VERSION \
         && php composer.phar config vendor-dir Vendor \
         && php composer.phar install
 
