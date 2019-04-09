@@ -9,8 +9,6 @@ services:
     volumes:
       - 'mariadb_data:/bitnami'
     environment:
-      # ALLOW_EMPTY_PASSWORD is recommended only for development.
-      #- ALLOW_EMPTY_PASSWORD=yes
       - MARIADB_ROOT_PASSWORD=MISPCHANGEME
       - MARIADB_USER=misp
       - MARIADB_PASSWORD=mispchangeme
@@ -18,30 +16,48 @@ services:
       - MARIADB_EXTRA_FLAGS=--max_connections=500
     sysctls:
       net.core.somaxconn: 65535
+    healthcheck:
+      test: [ "CMD" , "/bin/bash" , "-c" , "echo lol > /dev/tcp/127.0.0.1/3306" ]
+      interval: 1s
+      retries: 120
   redis:
     image: 'bitnami/redis:4.0'
     environment:
-      # ALLOW_EMPTY_PASSWORD is recommended only for development.
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     ports:
       - '6379:6379'
   misp:
-    image: 'opencybersec/misp:latest'
+    image: 'misptt:latest'
+    depends_on:
+      - mariadb
+      - redis
     environment: 
-      - APACHE_CERT_SUBJ=/CN=MISP/O=OpenCyberSec/C=EU
-      - APACHE_SERVERADMIN=open@opencybersec.org
+      # DB Conf
       - MARIADB_HOSTNAME=mariadb
       - MARIADB_PORT=3306
       - MARIADB_DATABASE=misp
       - MARIADB_USER=misp
       - MARIADB_PASSWORD=mispchangeme
+      # Redis Conf
       - REDIS_HOSTNAME=redis
       - REDIS_PORT=6379
+      # WS Conf
+      - MISP_BASEURL=http://127.0.0.1:5000
+      - MISP_LIVE=1
+      - FQDN=localhost
+      - APACHE_SERVERADMIN=open@opencybersec.org
+      # GPG Conf
+      - GPG_REAL_NAME=John Doe
+      - GPG_EMAIL_ADDRESS=open@opencybersec.org
+      - GPG_KEY_LENGTH=2048
+      - GPG_PASSPHRASE=
+      # SSL Conf
+      - APACHE_CERT_SUBJ=/CN=MISP/O=OpenCyberSec/C=EU
     ports:
       - '8443:443'
     volumes:
-      - 'misp_data:/persistent'
+      - 'misp_data:/persist'
 
 volumes:
   mariadb_data:

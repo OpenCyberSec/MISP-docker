@@ -7,9 +7,11 @@ ENV PYTHONSTIX_VERSION v1.1.1.4
 ENV CAKERESQUE_VERSION 4.1.2
 
 RUN apt-get update -q \
-        && DEBIAN_FRONTEND=noninteractive apt-get install -qy --no-install-recommends apt-utils supervisor build-essential zip php-pear git redis-server make python-dev python-pip libxml2-dev libxslt1-dev zlib1g-dev php-dev libapache2-mod-php php-mysql curl apache2 mysql-client postfix python-dev python-pip libxml2-dev libxslt-dev zlib1g-dev gcc libsodium-dev \
+        && DEBIAN_FRONTEND=noninteractive apt-get install -qy --no-install-recommends apt-utils supervisor build-essential zip php-pear git make python-dev python-pip libxml2-dev libxslt1-dev zlib1g-dev php-dev libapache2-mod-php php-mysql curl apache2 mysql-client python-dev python-pip libxml2-dev libxslt-dev zlib1g-dev gcc libsodium-dev sudo gnupg-agent gnupg \
         && pip install -U pip setuptools \
-        && DEBIAN_FRONTEND=noninteractive apt-get install -qy --no-install-recommends php-redis pkg-config \
+	&& echo "postfix postfix/mailname string `hostname`.misp.local" | debconf-set-selections \
+	&& echo "postfix postfix/main_mailer_type string 'Satellite system'" | debconf-set-selections \
+        && DEBIAN_FRONTEND=noninteractive apt-get install -qy --no-install-recommends php-redis pkg-config postfix \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/*
 
@@ -21,7 +23,6 @@ RUN cd /var/www \
         && git checkout tags/$MISP_VERSION \
         && cd /var/www/MISP \
         && git config core.filemode false
-
 RUN cd /var/www/MISP/app/files/scripts \
         && git clone https://github.com/CybOXProject/python-cybox.git \
         && cd /var/www/MISP/app/files/scripts/python-cybox \
@@ -86,6 +87,8 @@ ADD conf/nodaemon.conf /etc/supervisor/conf.d/nodaemon.conf
 ADD scripts/start.sh /start.sh
 
 RUN usermod --shell /bin/bash www-data
+
+# TODO: Put timezone in runtime ENV and set it with the start script.
 RUN cp /usr/share/zoneinfo/Europe/Madrid /etc/localtime
 
 ENTRYPOINT ["/bin/bash","/start.sh"]
