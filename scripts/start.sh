@@ -3,8 +3,8 @@
 PATH_TO_MISP=/var/www/MISP
 
 echo "- GENERAL: Starting async chown & chmods"
-chown www-data:www-data $PATH_TO_MISP &
-chown www-data:www-data /persist &
+chown -R www-data:www-data $PATH_TO_MISP &
+chown -R www-data:www-data /persist &
 chmod -R 750 $PATH_TO_MISP/app/Config &
 
 ## Set database salt //TODO: put in ENV
@@ -146,7 +146,34 @@ $PATH_TO_MISP/app/Console/cake Live $MISP_LIVE
 # TODO: Set default gnupg homedir
 #$PATH_TO_MISP/app/Console/cake homedir /persist/.gnupg
 
-#TODO: Set persistent config (understanding if is a newer version of the container we need to do a backup and do something with that)
+# CONFIGS
+#TODO: Check changes of MISP version.
+if ! [ -d /persist/config ];then
+	mkdir /persist/config
+fi
+if ! [ -f /persist/config/bootstrap.php ];then
+	cp $PATH_TO_MISP/app/Config/bootstrap.php /persist/config/bootstrap.php
+fi
+rm -rf $PATH_TO_MISP/app/Config/bootstrap.php
+ln -s /persist/config/bootstrap.php $PATH_TO_MISP/app/Config/bootstrap.php
+
+if ! [ -f /persist/config/database.php ];then
+        cp $PATH_TO_MISP/app/Config/database.php /persist/config/database.php
+fi
+rm -rf $PATH_TO_MISP/app/Config/database.php
+ln -s /persist/config/database.php $PATH_TO_MISP/app/Config/database.php
+if ! [ -f /persist/config/core.php ];then
+        cp $PATH_TO_MISP/app/Config/core.php /persist/config/core.php
+fi
+rm -rf $PATH_TO_MISP/app/Config/core.php
+ln -s /persist/config/core.php $PATH_TO_MISP/app/Config/core.php
+if ! [ -f /persist/config/config.php ];then
+        cp $PATH_TO_MISP/app/Config/config.php /persist/config/config.php
+fi
+rm -rf $PATH_TO_MISP/app/Config/config.php
+ln -s /persist/config/config.php $PATH_TO_MISP/app/Config/config.php
+# CONFIGS END
+
 sed -i "s/'host' => 'localhost',/'host' => '$REDIS_HOSTNAME',/g" $PATH_TO_MISP/app/Plugin/CakeResque/Config/config.php
 
 echo "--- MISP is ready ---"
@@ -154,4 +181,5 @@ echo "Login and passwords for the MISP image are the following:"
 echo "Web interface (default network settings): $MISP_BASEURL"
 echo "MISP admin:  admin@admin.test/admin"
 
+chown www-data.www-data -R /persist &
 /usr/bin/supervisord
