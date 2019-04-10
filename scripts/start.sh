@@ -75,6 +75,7 @@ if [[ $(echo lol > /dev/tcp/$MARIADB_HOSTNAME/3306 2>/dev/null >/dev/null;echo $
 	echo "- MYSQL: ERROR - Can't connect to mysql server"
 	exit 1
 fi
+# TODO: Do something better with that
 echo "Connecting to database ..."
 linescount=`echo 'show tables from misp;' | mysql $MARIADB_DATABASE -u misp --password=$MARIADB_PASSWORD -h $MARIADB_HOSTNAME -P $MARIADB_PORT 2>1 | awk 'END { print NR }'`
 ret=`echo 'show tables from misp;' | mysql $MARIADB_DATABASE -u misp --password=$MARIADB_PASSWORD -h $MARIADB_HOSTNAME -P $MARIADB_PORT 2>1`
@@ -136,8 +137,17 @@ fi
 #SSL CONF END
 
 sed -i "s&\(ServerAdmin \)\(.*\)&\1$APACHE_SERVERADMIN &g" /etc/apache2/sites-available/misp.conf
+# TODO: Set default redis config
+#$PATH_TO_MISP/app/Console/cake redis_host $REDIS_HOSTNAME
+#$PATH_TO_MISP/app/Console/cake redis_port $REDIS_PORT
+#$PATH_TO_MISP/app/Console/cake redis_database 13
 $PATH_TO_MISP/app/Console/cake Baseurl $MISP_BASEURL
 $PATH_TO_MISP/app/Console/cake Live $MISP_LIVE
+# TODO: Set default gnupg homedir
+#$PATH_TO_MISP/app/Console/cake homedir /persist/.gnupg
+
+#TODO: Set persistent config (understanding if is a newer version of the container we need to do a backup and do something with that)
+sed -i "s/'host' => 'localhost',/'host' => '$REDIS_HOSTNAME',/g" $PATH_TO_MISP/app/Plugin/CakeResque/Config/config.php
 
 echo "--- MISP is ready ---"
 echo "Login and passwords for the MISP image are the following:"
