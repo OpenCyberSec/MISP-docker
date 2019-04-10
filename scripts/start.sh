@@ -173,16 +173,23 @@ if ! [ -f /persist/config/database.php ];then
 fi
 rm -rf $PATH_TO_MISP/app/Config/database.php
 ln -s /persist/config/database.php $PATH_TO_MISP/app/Config/database.php
+
 if ! [ -f /persist/config/core.php ];then
         cp $PATH_TO_MISP/app/Config/core.php /persist/config/core.php
 fi
 rm -rf $PATH_TO_MISP/app/Config/core.php
 ln -s /persist/config/core.php $PATH_TO_MISP/app/Config/core.php
+
 if ! [ -f /persist/config/config.php ];then
         cp $PATH_TO_MISP/app/Config/config.php /persist/config/config.php
 fi
 rm -rf $PATH_TO_MISP/app/Config/config.php
 ln -s /persist/config/config.php $PATH_TO_MISP/app/Config/config.php
+
+if ! [ -L /persist/Vendor ];then
+        ls -n $PATH_TO_MISP/app/Vendor /persist
+fi
+
 # CONFIGS END
 
 sed -i "s/'host' => 'localhost',/'host' => '$REDIS_HOSTNAME',/g" $PATH_TO_MISP/app/Plugin/CakeResque/Config/config.php
@@ -193,4 +200,5 @@ echo "Web interface (default network settings): $MISP_BASEURL"
 echo "MISP admin:  admin@admin.test/admin"
 
 chown www-data.www-data -R /persist &
+sudo -u www-data sh $PATH_TO_MISP/app/Console/worker/start.sh
 /usr/bin/supervisord
