@@ -64,6 +64,8 @@ RUN cd /etc/apache2/sites-available/ && \
 RUN a2enmod rewrite && \
     a2enmod headers
 
+RUN cp /var/www/MISP/INSTALL/misp.logrotate /etc/logrotate.d/misp
+
 RUN cd /var/www/MISP/app/Config \
         && cp -a bootstrap.default.php bootstrap.php \
         && cp -a database.default.php database.php \
