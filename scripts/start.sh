@@ -187,7 +187,7 @@ rm -rf $PATH_TO_MISP/app/Config/config.php
 ln -s /persist/config/config.php $PATH_TO_MISP/app/Config/config.php
 
 if ! [ -L /persist/Vendor ];then
-        ls -n $PATH_TO_MISP/app/Vendor /persist
+        ln -s $PATH_TO_MISP/app/Vendor /persist
 fi
 
 # CONFIGS END

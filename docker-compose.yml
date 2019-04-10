@@ -28,7 +28,7 @@ services:
     ports:
       - '6379:6379'
   misp:
-    image: 'misptt:latest'
+    image: 'mispt:latest'
     depends_on:
       - mariadb
       - redis
