@@ -88,7 +88,4 @@ ADD scripts/start.sh /start.sh
 
 RUN usermod --shell /bin/bash www-data
 
-# TODO: Put timezone in runtime ENV and set it with the start script.
-RUN cp /usr/share/zoneinfo/Europe/Madrid /etc/localtime
-
 ENTRYPOINT ["/bin/bash","/start.sh"]

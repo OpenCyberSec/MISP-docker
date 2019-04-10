@@ -54,6 +54,8 @@ services:
       - GPG_PASSPHRASE=
       # SSL Conf
       - APACHE_CERT_SUBJ=/CN=MISP/O=OpenCyberSec/C=EU
+      # TIMEZONE Conf
+      - TIMEZONE=Europe/Madrid
     ports:
       - '8443:443'
     volumes:

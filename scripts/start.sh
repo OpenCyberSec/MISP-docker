@@ -146,6 +146,17 @@ $PATH_TO_MISP/app/Console/cake Live $MISP_LIVE
 # TODO: Set default gnupg homedir
 #$PATH_TO_MISP/app/Console/cake homedir /persist/.gnupg
 
+#TIMEZONE CONF
+if ! [[ $TIMEZONE == "" ]];then
+	TIMEZONE=Europe/Madrid
+fi
+if ! [ -f /usr/share/zoneinfo/$TIMEZONE ];then
+	TIMEZONE=Europe/Madrid
+fi
+rm -rf /etc/localtime
+ln -s /usr/share/zoneinfo/$TIMEZONE /etc/localtime
+#TIMEZONE CONF END
+
 # CONFIGS
 #TODO: Check changes of MISP version.
 if ! [ -d /persist/config ];then
