@@ -47,6 +47,7 @@ services:
       - MISP_LIVE=1
       - FQDN=localhost
       - APACHE_SERVERADMIN=open@opencybersec.org
+      - DATABASE_SALT=CHANGEMECHANGEMEMISP
       # GPG Conf
       - GPG_REAL_NAME=John Doe
       - GPG_EMAIL_ADDRESS=open@opencybersec.org

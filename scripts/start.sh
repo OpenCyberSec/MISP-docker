@@ -7,9 +7,8 @@ chown -R www-data:www-data $PATH_TO_MISP &
 chown -R www-data:www-data /persist &
 chmod -R 750 $PATH_TO_MISP/app/Config &
 
-## Set database salt //TODO: put in ENV
 echo "- GENERAL: Setting database SALT"
-sed -i "s&\('salt'\)\(.*\)\(=>\)\(.*\)\(',\)&\1 \3 'CHANGEMECHANGEMEMISP\5&g" $PATH_TO_MISP/app/Config/config.php
+sed -i "s&\('salt'\)\(.*\)\(=>\)\(.*\)\(',\)&\1 \3 '$DATABASE_SALT\5&g" $PATH_TO_MISP/app/Config/config.php
 
 echo "- PHP: Setting custom parameters in php.ini"
 sed -i 's/\(max_execution_time = \)[0-9]\+/\1350/g' /etc/php/7.2/apache2/php.ini
