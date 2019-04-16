@@ -7,7 +7,7 @@ ENV PYTHONSTIX_VERSION v1.1.1.4
 ENV CAKERESQUE_VERSION 4.1.2
 
 RUN apt-get update -q \
-        && DEBIAN_FRONTEND=noninteractive apt-get install -qy --no-install-recommends apt-utils supervisor build-essential zip php-pear git make python-dev python-pip libxml2-dev libxslt1-dev zlib1g-dev php-dev libapache2-mod-php php-mysql curl apache2 mysql-client python-dev python-pip libxml2-dev libxslt-dev zlib1g-dev gcc libsodium-dev sudo gnupg-agent gnupg jq php7.2-mbstring \
+        && DEBIAN_FRONTEND=noninteractive apt-get install -qy --no-install-recommends apt-utils supervisor build-essential zip php-pear git make python-dev python-pip libxml2-dev libxslt1-dev zlib1g-dev php-dev libapache2-mod-php php-mysql curl apache2 mysql-client python-dev python-pip libxml2-dev libxslt-dev zlib1g-dev gcc libsodium-dev sudo gnupg-agent gnupg jq php7.2-mbstring inotify-tools \
         && pip install -U pip setuptools \
 	&& echo "postfix postfix/mailname string `hostname`.misp.local" | debconf-set-selections \
 	&& echo "postfix postfix/main_mailer_type string 'Satellite system'" | debconf-set-selections \

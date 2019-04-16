@@ -7,9 +7,6 @@ chown -R www-data:www-data $PATH_TO_MISP &
 chown -R www-data:www-data /persist &
 chmod -R 750 $PATH_TO_MISP/app/Config &
 
-echo "- GENERAL: Setting database SALT"
-sed -i "s&\('salt'\)\(.*\)\(=>\)\(.*\)\(',\)&\1 \3 '$DATABASE_SALT\5&g" $PATH_TO_MISP/app/Config/config.php
-
 echo "- PHP: Setting custom parameters in php.ini"
 sed -i 's/\(max_execution_time = \)[0-9]\+/\1350/g' /etc/php/7.2/apache2/php.ini
 sed -i 's/\(memory_limit = \)[0-9]\+/\1512/g' /etc/php/7.2/apache2/php.ini
@@ -179,11 +176,12 @@ fi
 rm -rf $PATH_TO_MISP/app/Config/core.php
 ln -s /persist/config/core.php $PATH_TO_MISP/app/Config/core.php
 
-if ! [ -f /persist/config/config.php ];then
-        cp $PATH_TO_MISP/app/Config/config.php /persist/config/config.php
+if [ -f /persist/config/config.php ];then
+        cp /persist/config/config.php $PATH_TO_MISP/app/Config/config.php
+else
+	echo "- GENERAL: Setting database SALT"
+	sed -i "s&\('salt'\)\(.*\)\(=>\)\(.*\)\(',\)&\1 \3 '$DATABASE_SALT\5&g" $PATH_TO_MISP/app/Config/config.php
 fi
-rm -rf $PATH_TO_MISP/app/Config/config.php
-ln -s /persist/config/config.php $PATH_TO_MISP/app/Config/config.php
 
 if ! [ -L /persist/Vendor ];then
         ln -s $PATH_TO_MISP/app/Vendor /persist
