@@ -8,8 +8,10 @@ chown -R www-data:www-data /persist &
 chmod -R 750 $PATH_TO_MISP/app/Config &
 
 echo "- PHP: Setting custom parameters in php.ini"
-sed -i 's/\(max_execution_time = \)[0-9]\+/\1350/g' /etc/php/7.2/apache2/php.ini
-sed -i 's/\(memory_limit = \)[0-9]\+/\1512/g' /etc/php/7.2/apache2/php.ini
+sed -i "s/\(post_max_size = \)[0-9]\+/\1$PHP_POST_MAX_SIZE/g" /etc/php/7.2/apache2/php.ini
+sed -i "s/\(upload_max_filesize = \)[0-9]\+/\1$PHP_UPLOAD_MAX_FILESIZE/g" /etc/php/7.2/apache2/php.ini
+sed -i "s/\(max_execution_time = \)[0-9]\+/\1$PHP_MAX_EXECUTION_TIME/g" /etc/php/7.2/apache2/php.ini
+sed -i "s/\(memory_limit = \)[0-9]\+/\1$PHP_MEMORY_LIMIT/g" /etc/php/7.2/apache2/php.ini
 
 echo "- GNUPG: Healthcheck"
 if ! [ -d /persist/.gnupg ];then
@@ -175,6 +177,7 @@ if ! [ -f /persist/config/core.php ];then
 fi
 rm -rf $PATH_TO_MISP/app/Config/core.php
 ln -s /persist/config/core.php $PATH_TO_MISP/app/Config/core.php
+
 
 if [ -f /persist/config/config.php ];then
         cp /persist/config/config.php $PATH_TO_MISP/app/Config/config.php
